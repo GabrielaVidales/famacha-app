@@ -1,0 +1,42 @@
+# ============================================================
+#  FAMACHA-Net — configuración de entrenamiento
+# ============================================================
+
+data:
+  labels_csv: data/labels.csv          # CSV con una fila por foto (ver data/labels_template.csv)
+  processed_dir: data/processed        # salida de scripts/prepare.py
+  image_size: 224
+  crop_margin: 0.15                    # margen extra alrededor del bbox de la conjuntiva
+  test_fraction: 0.20                  # fracción de ANIMALES (no fotos) reservada para test
+  pcv_anemia_threshold: 19.0           # PCV (%) <= umbral -> anémico (estándar en cabras/borregos)
+  seed: 42
+
+# Parámetros clínicos adicionales (Five Point Check + contexto).
+# Pon enabled: false si tu app no los va a capturar: el modelo debe
+# entrenarse con las mismas entradas que tendrá en producción.
+metadata:
+  enabled: true
+  numeric: [bcs, dag_score, age_months, days_since_deworm]
+  binary:  [bottle_jaw, nasal_discharge, diarrhea, is_goat, rainy_season]
+
+model:
+  backbone: efficientnetv2b0           # efficientnetv2b0 | mobilenetv3large (más ligera)
+  weights: imagenet                    # imagenet | none
+  white_balance: true                  # balance de blancos en el grafo (white-patch sobre brillos especulares)
+  color_features: true                 # rama de estadísticas de color de la conjuntiva
+  dropout: 0.3
+  pcv_head: auto                       # auto = solo si el CSV trae PCV
+
+train:
+  folds: 5                             # >1 = validación cruzada por animal + ensamble
+  batch_size: 16
+  epochs_head: 15                      # fase 1: backbone congelado
+  epochs_finetune: 40                  # fase 2: fine-tuning
+  lr_head: 1.0e-3
+  lr_finetune: 1.0e-5
+  unfreeze_fraction: 0.3               # fracción final del backbone que se descongela
+  patience: 8
+  class_weighting: true
+  target_sensitivity: 0.95             # sensibilidad mínima para la decisión "tratar"
+
+output_dir: runs/exp1

@@ -1,0 +1,13 @@
+tensorflow>=2.16
+keras>=3.0
+numpy
+pandas
+scikit-learn
+opencv-python-headless
+pillow
+matplotlib
+pyyaml
+# Para exportar a la página web (ver README):
+#   pip install --no-deps tensorflowjs==4.22.0 && pip install tensorflow-hub
+# Para descargar datasets de Roboflow:
+#   pip install roboflow
